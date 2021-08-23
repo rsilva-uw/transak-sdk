@@ -1455,38 +1455,26 @@ TransakSDK.prototype.modal = async function () {
         url,
         width,
         height,
+        widgetContainer,
         partnerData
       } = await generateURL({ ...this.partnerData,
         sdkVersion: this.sdkVersion
       });
       let wrapper = document.createElement('div');
       wrapper.id = "transakFiatOnOffRamp";
-      wrapper.innerHTML = `<div class="transak_modal-overlay" id="transak_modal-overlay"></div><div class="transak_modal" id="transak_modal"><div class="transak_modal-content"><span class="transak_close">${_svg.closeSVGIcon}</span><div class="transakContainer"><iframe id="transakOnOffRampWidget" allow="camera;fullscreen;accelerometer;gyroscope;magnetometer" allowFullScreen src="${url}" style="width: ${width}; height: ${height}"></iframe></div></div></div>`;
-      let container = document.getElementsByTagName("body");
+      wrapper.innerHTML = `<div class="transakContainer"><iframe id="transakOnOffRampWidget" allow="camera;fullscreen;accelerometer;gyroscope;magnetometer" allowFullScreen src="${url}" style="width: ${width}; height: ${height}"></iframe></div>`;
+      let container = document.querySelectorAll(widgetContainer ? widgetContainer : "body");
       if (!container) container = document.getElementsByTagName("html");
       if (!container) container = document.getElementsByTagName("div");
       await container[0].appendChild(wrapper);
       await setStyle(this.partnerData.themeColor, width, height);
       let modal = document.getElementById("transakFiatOnOffRamp");
-      let span = document.getElementsByClassName("transak_close")[0]; //Prevent background scrolling when overlay appears
-
-      document.documentElement.style.overflow = 'hidden';
-      document.body.scroll = "no";
       if (modal && modal.style) modal.style.display = "block";
       this.isInitialised = true;
       eventEmitter.emit(_constants.EVENTS.TRANSAK_WIDGET_INITIALISED, {
         status: true,
         eventName: _constants.EVENTS.TRANSAK_WIDGET_INITIALISED
-      }); // When the user clicks on <span> (x), close the modal
-
-      span.onclick = () => {
-        return this.closeRequest();
-      }; // When the user clicks anywhere outside of the modal, close it
-
-
-      window.onclick = event => {
-        if (event.target === document.getElementById("transak_modal-overlay")) this.closeRequest();
-      };
+      }); // When the user clicks anywhere outside of the modal, close it
 
       if (window.addEventListener) window.addEventListener("message", handleMessage);else window.attachEvent("onmessage", handleMessage);
     }
